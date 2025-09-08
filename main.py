@@ -318,19 +318,7 @@ def main():
         # Show instructions when no file is uploaded
         st.info("👆 Please upload a CSV file to get started")
         
-        # Example data
-        with st.expander("📋 Example CSV Format"):
-            example_data = """name,age,salary,department,city
-John Doe,28,50000,Engineering,New York
-Jane Smith,32,60000,Marketing,Los Angeles
-Bob Johnson,45,75000,Sales,Chicago
-Alice Brown,29,55000,Engineering,San Francisco
-Charlie Wilson,38,65000,Marketing,New York"""
-            
-            st.code(example_data, language="csv")
-            st.write("This app supports various visualization types including:")
-            st.write("• Scatter plots • Line charts • Bar charts • Histograms")
-            st.write("• Box plots • Violin plots • Heatmaps • Pie charts • Area charts")
+
 
 if __name__ == "__main__":
     main()
