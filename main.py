@@ -45,9 +45,9 @@ def main():
         try:
             # Read CSV file
             df = pd.read_csv(uploaded_file, encoding='ISO-8859-1')
-# Clean numeric-like strings (remove commas, spaces, quotes)
+            # Clean numeric-like strings (remove commas, spaces, quotes)
             df = df.replace({',': '', '"': '', ' ':'','-': ''}, regex=True)
-# Convert columns that look numeric
+            # Convert columns that look numeric
             for col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='ignore')
             # Display basic info
@@ -103,12 +103,13 @@ def main():
             
             numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
             categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-            print(numeric_cols)
+            
             # Visualization type selection
             viz_type = st.sidebar.selectbox(
                 "Choose Visualization Type:",
                 [
                     "Scatter Plot",
+                    "Bubble Plot",  # Added Bubble Plot option
                     "Line Chart",
                     "Bar Chart",
                     "Histogram",
@@ -162,6 +163,36 @@ def main():
                     st.plotly_chart(fig, use_container_width=True)
                 else:
                     st.warning("Need at least 2 numeric columns for scatter plot")
+            
+            elif viz_type == "Bubble Plot":  # Added Bubble Plot implementation
+                if len(numeric_cols) >= 3:
+                    x_col = st.sidebar.selectbox("X-axis", numeric_cols)
+                    y_col = st.sidebar.selectbox("Y-axis", numeric_cols)
+                    size_col = st.sidebar.selectbox("Size by", numeric_cols)
+                    color_col = st.sidebar.selectbox("Color by", [None] + categorical_cols)
+                    
+                    # Add slider for bubble size scaling
+                    size_max = st.sidebar.slider(
+                        "Max bubble size", 
+                        min_value=10, 
+                        max_value=100, 
+                        value=50,
+                        help="Adjust the maximum size of bubbles"
+                    )
+                    
+                    fig = px.scatter(
+                        filtered_df, 
+                        x=x_col, 
+                        y=y_col, 
+                        size=size_col,
+                        color=color_col,
+                        title=f"Bubble Plot: {x_col} vs {y_col} (Size: {size_col})",
+                        hover_data=df.columns.tolist(),
+                        size_max=size_max
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.warning("Need at least 3 numeric columns for bubble plot")
             
             elif viz_type == "Line Chart":
                 if len(numeric_cols) >= 1:
@@ -320,5 +351,6 @@ def main():
     else:
         # Show instructions when no file is uploaded
         st.info("👆 Please upload a CSV file to get started")
+
 if __name__ == "__main__":
     main()
