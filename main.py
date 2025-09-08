@@ -44,8 +44,12 @@ def main():
     if uploaded_file is not None:
         try:
             # Read CSV file
-            df = pd.read_csv(uploaded_file,encoding='ISO-8859-1')
-            
+            df = pd.read_csv(uploaded_file, encoding='ISO-8859-1')
+# Clean numeric-like strings (remove commas, spaces, quotes)
+            df = df.replace({',': '', '"': '', ' ':'','-': ''}, regex=True)
+# Convert columns that look numeric
+            for col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='ignore')
             # Display basic info
             st.sidebar.header("📋 Dataset Information")
             st.sidebar.write(f"**Shape:** {df.shape[0]} rows × {df.shape[1]} columns")
@@ -99,7 +103,7 @@ def main():
             
             numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
             categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-            
+            print(numeric_cols)
             # Visualization type selection
             viz_type = st.sidebar.selectbox(
                 "Choose Visualization Type:",
@@ -118,7 +122,6 @@ def main():
             
             # Filter options
             st.sidebar.header("🔍 Filters")
-            
             filter_cols = []
             for col in df.columns:
                 if df[col].nunique() < 50:  # Only show filter for columns with reasonable unique values
@@ -144,7 +147,7 @@ def main():
             # Visualization parameters based on type
             if viz_type == "Scatter Plot":
                 if len(numeric_cols) >= 2:
-                    x_col = st.sidebar.selectbox("X-axis", numeric_cols)
+                    x_col = st.sidebar.selectbox("X-axis", df.columns)
                     y_col = st.sidebar.selectbox("Y-axis", numeric_cols)
                     color_col = st.sidebar.selectbox("Color by", [None] + categorical_cols)
                     
@@ -317,8 +320,5 @@ def main():
     else:
         # Show instructions when no file is uploaded
         st.info("👆 Please upload a CSV file to get started")
-        
-
-
 if __name__ == "__main__":
     main()
