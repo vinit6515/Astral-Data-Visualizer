@@ -6,6 +6,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from io import StringIO
 import numpy as np
+import os
+import uuid
+from datetime import datetime
+
+# Create uploads directory if it doesn't exist
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
 
 # Set page configuration
 st.set_page_config(
@@ -30,26 +37,85 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def save_uploaded_file(uploaded_file):
+    """Save uploaded file to uploads folder using original filename"""
+    file_path = os.path.join("uploads", uploaded_file.name)
+    
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    
+    return file_path, uploaded_file.name
+
+def get_saved_files():
+    """Get list of saved files in uploads directory"""
+    if not os.path.exists("uploads"):
+        return []
+    
+    files = []
+    for filename in os.listdir("uploads"):
+        if filename.endswith('.csv'):
+            file_path = os.path.join("uploads", filename)
+            file_time = os.path.getmtime(file_path)
+            files.append({
+                'filename': filename,
+                'path': file_path,
+                'upload_time': datetime.fromtimestamp(file_time).strftime('%Y-%m-%d %H:%M:%S')
+            })
+    
+    # Sort by upload time (newest first)
+    files.sort(key=lambda x: x['upload_time'], reverse=True)
+    return files
+
 def main():
     st.title("📊 CSV Data Visualizer")
     st.markdown("Upload your CSV file and create interactive visualizations")
     
+    # Display saved files in sidebar
+    saved_files = get_saved_files()
+    if saved_files:
+        st.sidebar.header("📁 Previously Uploaded Files")
+        
+        # Create a selectbox for saved files
+        saved_file_options = {f['filename']: f['path'] for f in saved_files}
+        selected_file = st.sidebar.selectbox(
+            "Choose a previously uploaded file:",
+            options=[""] + list(saved_file_options.keys()),
+            format_func=lambda x: "Select a file..." if x == "" else x
+        )
+    
     # File upload
     uploaded_file = st.file_uploader(
-        "Choose a CSV file", 
+        "Or choose a new CSV file", 
         type=['csv'],
         help="Upload a CSV file to visualize"
     )
     
+    # Determine which file to use
+    file_to_use = None
+    file_source = None
+    
     if uploaded_file is not None:
+        # Save the new uploaded file
+        file_path, filename = save_uploaded_file(uploaded_file)
+        file_to_use = file_path
+        file_source = f"New upload: {filename}"
+        st.sidebar.success(f"Saved new file: {filename}")
+    elif saved_files and selected_file and selected_file != "":
+        file_to_use = saved_file_options[selected_file]
+        file_source = f"Previously uploaded: {selected_file}"
+    
+    if file_to_use:
         try:
+            st.sidebar.info(f"Using: {file_source}")
+            
             # Read CSV file
-            df = pd.read_csv(uploaded_file, encoding='ISO-8859-1')
+            df = pd.read_csv(file_to_use, encoding='ISO-8859-1')
             # Clean numeric-like strings (remove commas, spaces, quotes)
             df = df.replace({',': '', '"': '', ' ':'','-': ''}, regex=True)
             # Convert columns that look numeric
             for col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='ignore')
+                
             # Display basic info
             st.sidebar.header("📋 Dataset Information")
             st.sidebar.write(f"**Shape:** {df.shape[0]} rows × {df.shape[1]} columns")
@@ -91,7 +157,7 @@ def main():
                     numeric_cols = df.select_dtypes(include=[np.number]).columns
                     df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
                 elif missing_option == "Fill with median":
-                    numeric_cols = df.select_dtypes(include=[np.number]).columns
+                    numeric_cols = df.select_dtypes(include([np.number])).columns
                     df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].median())
                 elif missing_option == "Fill with mode":
                     for col in df.columns:
