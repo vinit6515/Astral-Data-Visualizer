@@ -10,11 +10,11 @@ import os
 import uuid
 from datetime import datetime
 
-# Create uploads directory if it doesn't exist
+
 if not os.path.exists("uploads"):
     os.makedirs("uploads")
 
-# Set page configuration
+
 st.set_page_config(
     page_title="CSV Data Visualizer",
     page_icon="📊",
@@ -22,7 +22,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+
 st.markdown("""
 <style>
     .main-header {
@@ -62,7 +62,7 @@ def get_saved_files():
                 'upload_time': datetime.fromtimestamp(file_time).strftime('%Y-%m-%d %H:%M:%S')
             })
     
-    # Sort by upload time (newest first)
+    
     files.sort(key=lambda x: x['upload_time'], reverse=True)
     return files
 
@@ -70,12 +70,12 @@ def main():
     st.title("📊 CSV Data Visualizer")
     st.markdown("Upload your CSV file and create interactive visualizations")
     
-    # Display saved files in sidebar
+    
     saved_files = get_saved_files()
     if saved_files:
         st.sidebar.header("📁 Previously Uploaded Files")
         
-        # Create a selectbox for saved files
+        
         saved_file_options = {f['filename']: f['path'] for f in saved_files}
         selected_file = st.sidebar.selectbox(
             "Choose a previously uploaded file:",
@@ -83,7 +83,7 @@ def main():
             format_func=lambda x: "Select a file..." if x == "" else x
         )
     
-    # File upload
+
     uploaded_file = st.file_uploader(
         "Or choose a new CSV file", 
         type=['csv'],
