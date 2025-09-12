@@ -16,7 +16,7 @@ if not os.path.exists("uploads"):
 
 
 st.set_page_config(
-    page_title="CSV Data Visualizer",
+    page_title="Astral CSV Data Visualizer",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
