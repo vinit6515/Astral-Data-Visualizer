@@ -230,14 +230,14 @@ def main():
                 else:
                     st.warning("Need at least 2 numeric columns for scatter plot")
             
-            elif viz_type == "Bubble Plot":  # Added Bubble Plot implementation
+            elif viz_type == "Bubble Plot":  
                 if len(numeric_cols) >= 3:
                     x_col = st.sidebar.selectbox("X-axis", numeric_cols)
                     y_col = st.sidebar.selectbox("Y-axis", numeric_cols)
                     size_col = st.sidebar.selectbox("Size by", numeric_cols)
                     color_col = st.sidebar.selectbox("Color by", [None] + categorical_cols)
                     
-                    # Add slider for bubble size scaling
+                   
                     size_max = st.sidebar.slider(
                         "Max bubble size", 
                         min_value=10, 
@@ -397,12 +397,12 @@ def main():
                 else:
                     st.warning("Need at least 1 numeric column for area chart")
             
-            # Display filtered data
+           
             with st.expander("📋 View Filtered Data"):
                 st.write(f"**Filtered data shape:** {filtered_df.shape[0]} rows × {filtered_df.shape[1]} columns")
                 st.dataframe(filtered_df, use_container_width=True)
             
-            # Download filtered data
+            
             csv = filtered_df.to_csv(index=False)
             st.download_button(
                 label="📥 Download Filtered Data as CSV",
@@ -415,7 +415,7 @@ def main():
             st.error(f"Error processing file: {str(e)}")
     
     else:
-        # Show instructions when no file is uploaded
+        
         st.info("👆 Please upload a CSV file to get started")
 
 if __name__ == "__main__":
