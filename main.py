@@ -187,11 +187,11 @@ def main():
                 ]
             )
             
-            # Filter options
+            
             st.sidebar.header("🔍 Filters")
             filter_cols = []
             for col in df.columns:
-                if df[col].nunique() < 50:  # Only show filter for columns with reasonable unique values
+                if df[col].nunique() < 50:  
                     filter_cols.append(col)
             
             selected_filters = {}
@@ -205,13 +205,13 @@ def main():
                     )
                     selected_filters[col] = selected_vals
             
-            # Apply filters
+            
             filtered_df = df.copy()
             for col, vals in selected_filters.items():
                 if len(vals) > 0:
                     filtered_df = filtered_df[filtered_df[col].isin(vals)]
             
-            # Visualization parameters based on type
+            
             if viz_type == "Scatter Plot":
                 if len(numeric_cols) >= 2:
                     x_col = st.sidebar.selectbox("X-axis", df.columns)
